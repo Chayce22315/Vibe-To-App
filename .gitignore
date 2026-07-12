@@ -1,0 +1,17 @@
+# === Xcode & OS User Junk ===
+.DS_Store
+build/
+DerivedData/
+*.xcuserstate
+*.xcuserdatad
+
+# === XcodeGen Specific (CRITICAL) ===
+# We build these dynamically, so we NEVER track them!
+*.xcodeproj/
+*.xcworkspace/
+
+# === Secrets & Keys ===
+# In case we ever add private OpenRouter proxy keys locally later
+.env
+*.local
+.vibe_tokens
