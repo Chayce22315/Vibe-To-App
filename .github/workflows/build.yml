@@ -1,0 +1,54 @@
+name: VibeToApp iOS Build CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  setup:
+      runs-on: macos-26
+
+      steps:
+      - name: checkout repo again
+        uses: actions/checkout@v4
+
+      - name: install brew
+        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  build:
+    runs-on: macos-26
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Select Xcode Version
+      run: sudo xcode-select -s /Applications/Xcode.app
+
+    - name: Build iOS App Bundle
+      run: |
+        xcodebuild build \
+          -package VibeToApp \
+          -scheme VibeToApp \
+          -destination 'generic/platform=iOS' \
+          -configuration Release \
+          -derivedDataPath ./build \
+          CODE_SIGNING_ALLOWED=NO \
+          CODE_SIGNING_REQUIRED=NO
+
+    - name: Package into IPA
+      run: |
+        mkdir -p Payload
+        # Find the compiled .app bundle inside DerivedData and copy it into the Payload folder
+        APP_PATH=$(find ./build -name "*.app" -type d | head -n 1)
+        cp -R "$APP_PATH" Payload/
+        # Zip the Payload directory into a standard .ipa archive
+        zip -r VibeToApp.ipa Payload
+
+    - name: Upload iOS App Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: VibeToApp-Build
+        path: VibeToApp.ipa
+        retention-days: 5
